@@ -1,0 +1,26 @@
+version: "3.7"
+services:
+  olyndha_mysql:
+    image: mysql:8.0.30-debian
+    # NOTE: use of "mysql_native_password" is not recommended:
+    # https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
+    # (this is just an example, not intended to be a production configuration)
+    command: --default-authentication-plugin=mysql_native_password
+    container_name: olyndha_mysql
+    restart: always
+    volumes:
+      # All the data will be persisted at ./db/data on the host 
+      - ./db/data/:/var/lib/mysql
+      # executing a first set of SQL code to initialize the database
+      - "./backend/database/scripts/init.sql:/docker-entrypoint-initdb.d/init.sql"
+    environment:
+      # Password for the root user
+      MYSQL_ROOT_PASSWORD: olyndha
+      MYSQL_DATABASE: tesisolyndha
+  olyndha_backend:
+    image: olyndha_backend # Image comes from Dockerfile at ./backend
+    container_name: olyndha_backend
+    tty: true
+    environment:
+      DB_HOST: olyndha_mysql # stablish connection with MySQL
+      API_PORT: 8800 # where to serve the API
