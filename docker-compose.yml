@@ -24,6 +24,8 @@ services:
     ports:
       - 3000:3000
   olyndha_backend:
+    volumes:
+      - ./backend/:/go/
     image: olyndha_backend # Image comes from Dockerfile at ./backend
     container_name: olyndha_backend
     tty: true

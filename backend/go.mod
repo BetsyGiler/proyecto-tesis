@@ -1,3 +1,3 @@
-module proyecto-olyndha
+module olyndha
 
 go 1.19
