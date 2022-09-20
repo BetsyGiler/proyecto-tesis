@@ -1,7 +1,7 @@
 <h1>Integrantes</h1>
 <ul>
-<li style="color: green">Lady</li>
-<li style="color: blue">Olyndha</li>
+<li style="color: green">Lady Cantos</li>
+<li style="color: blue">Vetsi Olyndha</li>
 </ul>
 
 <h1>Requisitos</h1>
