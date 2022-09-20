@@ -16,7 +16,7 @@ func HandleNetworkTraffic() {
 	// Port where to serve the API
 	port := helpers.ReadEnv("API_PORT", "8800")
 
-	fmt.Printf("Server running on port %s", port)
+	fmt.Printf("Server running on port %s\n", port)
 
 	// Creates logs for all requests and listen to the port defined 
 	// for the API

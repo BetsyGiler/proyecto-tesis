@@ -8,6 +8,8 @@ services:
     command: --default-authentication-plugin=mysql_native_password
     container_name: olyndha_mysql
     restart: always
+    ports:
+      - 3306:3306
     volumes:
       # All the data will be persisted at ./db/data on the host 
       - ./db/data/:/var/lib/mysql
@@ -24,11 +26,16 @@ services:
     ports:
       - 3000:3000
   olyndha_backend:
+    ports:
+      - 8800:8800
     volumes:
-      - ./backend/:/go/
+      - ./backend/:/backend/
     image: olyndha_backend # Image comes from Dockerfile at ./backend
     container_name: olyndha_backend
     tty: true
     environment:
-      DB_HOST: olyndha_mysql # stablish connection with MySQL
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: olyndha
+      MYSQL_DATABASE: tesisolyndha
+      MYSQL_HOST: olyndha_mysql # stablish connection with MySQL
       API_PORT: 8800 # where to serve the API

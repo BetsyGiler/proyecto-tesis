@@ -2,15 +2,15 @@ package models
 
 // The model corresponding to the user schema on the database
 type user struct {
-	Cedula          string // Accepts only EC format
-	Nombre          string
-	Telefono        string // Accepts only EC formats with +593
-	Correo          string
-	Contrasena      string // this will be encrypted
-	FechaNacimiento int64  // Unix format (nanoseconds)
-	Direccion       string
-	Token           string // Session token (only one per device)
-	Active          bool   // Used to virtually delete a record on DB
+	Cedula          string `json:"Cedula"` // Accepts only EC format
+	Nombre          string `json:"Nombre"`
+	Telefono        string `json:"Telefono"` // Accepts only EC formats with +593
+	Correo          string `json:"Correo"`
+	Contrasena      string `json:"Contrasena"`      // this will be encrypted
+	FechaNacimiento int64  `json:"FechaNacimiento"` // Unix format (nanoseconds)
+	Direccion       string `json:"Direccion"`
+	Token           string `json:"Token"`  // Session token (only one per device)
+	Active          bool   `json:"Active"` // Used to virtually delete a record on DB
 }
 
 // Since [user] is a private structure here we'll use a child
@@ -29,7 +29,7 @@ type Administrador struct {
 	user
 }
 
-// An employee for the system to attend meetings with the clients and brings 
+// An employee for the system to attend meetings with the clients and brings
 // support.
 type Empleado struct {
 	user
