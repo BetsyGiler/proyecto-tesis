@@ -11,6 +11,18 @@ CREATE TABLE IF NOT EXISTS Usuario(
     constraint CP_USUARIO primary key (Cedula)
 )ENGINE = InnoDB;
 
+CREATE TABLE IF NOT EXISTS Session(
+	Cedula char(10),
+	Token varchar not null,
+	IP varchar(16) null default "desconocida",
+	Device text null default "desconocido",
+	CreatedAt datetime not null,
+	LoggedOut datetime null,
+	constraint CP_SESSION primary key (Cedula),
+	constraint FK_Usuario foreign key(Cedula) references Usuario(Cedula)
+	on update cascade on delete no action
+)ENGINE=InnoDB;
+
 CREATE TABLE IF NOT EXISTS Cliente(
 	Cedula char(10),
     Descripcion text not null,
