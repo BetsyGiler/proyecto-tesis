@@ -22,6 +22,8 @@ services:
   olyndha_frontend:
     image: olyndha_frontend
     container_name: olyndha_frontend
+    volumes:
+      - ./react-client/:/usr/src/app/
     tty: true
     ports:
       - 3000:3000
