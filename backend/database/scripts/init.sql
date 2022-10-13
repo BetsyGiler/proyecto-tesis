@@ -13,9 +13,9 @@ CREATE TABLE IF NOT EXISTS Usuario(
 
 CREATE TABLE IF NOT EXISTS Session(
 	Cedula char(10),
-	Token varchar not null,
-	IP varchar(16) null default "desconocida",
-	Device text null default "desconocido",
+	Token varchar(64) not null,
+	IP varchar(16) null default 'desconocida',
+	Device varchar(150) null default 'desconocido',
 	CreatedAt datetime not null,
 	LoggedOut datetime null,
 	constraint CP_SESSION primary key (Cedula),
@@ -172,3 +172,114 @@ CREATE TABLE IF NOT EXISTS EmpleadoHorario(
 		references Horario(Id)
 			on update cascade on delete no action
 )ENGINE = InnoDB;
+
+-- functions
+delimiter //
+create function getRol(Cedula char(10)) returns varchar(10) deterministic
+begin
+	-- determining the role
+	select Cedula
+		from Administrador a
+		left join Empleado e on a.cedula = e.cedula
+		where a.cedula = Cedula
+		limit 1 into @rol;
+
+	return @rol;
+end //
+delimiter ;
+-- Procedures
+
+drop procedure if exists checkSession;
+
+delimiter //
+create procedure checkSession(
+	IN Token char(64),
+	IN IP char(15),
+	IN UserAgent text
+)
+begin
+	-- selecting all the records from token and saving into a variable
+	select Cedula, Token from Session 
+		where Token = Token 
+		and IP = IP 
+		and Device = UserAgent 
+		and LoggedOut is NULL
+		limit 1 into @cedula, @token;
+
+	-- if the variable is empty, then the token is not valid
+	if @cedula is NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Token no válido';
+	end if;
+
+	select @cedula as Cedula, @token as Token;
+end //
+delimiter ;
+
+drop procedure if exists login;
+delimiter //
+create procedure login(
+	IN Email varchar(255),
+	IN Password char(64),
+	IN IP char(15),
+	IN UserAgent text
+)
+begin
+	-- checking if there is not a session already
+	select Token from Session 
+		where IP = IP 
+		and Device = UserAgent 
+		and LoggedOut is NULL
+		limit 1 into @token;
+
+	-- if @token is not null, then there is a session already
+	if @token is not null then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Ya hay una sesión iniciada';
+	end if;
+
+	-- selecting all the records from token and saving into a variable
+	select Contrasena, Cedula, Nombre from Usuario
+		where Correo = Email
+		limit 1 into @password, @cedula, @nombre;
+
+	-- if the @password is emoty then the email is not valid
+	if @password is NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
+	end if;
+
+	-- checking if the password is correct
+	if @password != Password then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
+	end if;
+
+	-- updating the session table
+	start transaction;
+		-- generating a random 64 character string
+		set @token = md5(rand());
+		-- inserting a new record into token
+		insert into Session (Cedula, Token, IP, Device, CreatedAt) 
+					 values (@cedula, @token, IP, UserAgent, now());
+		-- determining the role
+		select getRol(@cedula) into @rol;
+		-- if the role is null, then the user is not valid, so we should rollback
+		if @rol is NULL then
+			rollback;
+			-- raising an error
+			signal sqlstate '45000' set message_text = 'Problema al obtener el rol. Contacte con personal de TI.';
+		end if;
+	commit;
+
+	-- returning the token and the role
+	select @token as Token, @rol as Rol, @nombre as Nombre;
+
+end //
+delimiter ;
+
+
+-- TODO: remove it
+call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
+call checkSession('token', 'ip', 'userAgent');
+
