@@ -278,6 +278,11 @@ begin
 end //
 delimiter ;
 
+delimiter //
+-- este proceso se encarga del registro normal de cliente
+create procedure standardSignup(
+
+)
 
 -- TODO: remove it
 call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
