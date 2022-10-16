@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS Usuario(
     Correo varchar(100) not null,
     Contrasena char(64) not null,
     sexo enum('M','F') not null, 
-    FechaNacimento date,
+    FechaNacimiento date,
     Direccion Varchar(150),
     Active boolean null default true,
     constraint CP_USUARIO primary key (Cedula)
@@ -175,6 +175,7 @@ CREATE TABLE IF NOT EXISTS EmpleadoHorario(
 
 -- functions
 delimiter //
+drop function if exists getRol;
 create function getRol(Cedula char(10)) returns varchar(10) deterministic
 begin
 	-- determining the role
@@ -183,6 +184,28 @@ begin
 		left join Empleado e on a.cedula = e.cedula
 		where a.cedula = Cedula
 		limit 1 into @rol;
+	
+	if @rol is not null then
+		return 'admin';
+	end if;
+
+	select Cedula
+		from Empleado e
+		where e.cedula = Cedula
+		limit 1 into @rol;
+
+	if @rol is not null then
+		return 'empleado';
+	end if;
+
+	select Cedula
+		from Cliente c
+		where c.cedula = Cedula
+		limit 1 into @rol;
+
+	if @rol is not null then
+		return 'cliente';
+	end if;
 
 	return @rol;
 end //
@@ -226,6 +249,7 @@ create procedure login(
 )
 begin
 	-- checking if there is not a session already
+	set @token = null;
 	select Token from Session 
 		where IP = IP 
 		and Device = UserAgent 
@@ -255,6 +279,17 @@ begin
 		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
 	end if;
 
+	-- checking if the user is Active
+	select Active from Usuario
+		where Correo = Email
+		limit 1 into @activo;
+
+	-- if @activo is false then the user deleted the account
+	if @activo = 0 then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Usuario inactivo';
+	end if;
+
 	-- updating the session table
 	start transaction;
 		-- generating a random 64 character string
@@ -279,12 +314,95 @@ end //
 delimiter ;
 
 delimiter //
+drop procedure if exists logout;
 -- este proceso se encarga del registro normal de cliente
 create procedure standardSignup(
-
+	IN Nombre varchar(100),
+	IN Cedula char(10),
+	IN Correo varchar(255),
+	IN Contrasena char(64),
+	IN Telefono char(10),
+	IN Direccion varchar(255),
+	IN FechaNacimiento date,
+	IN Descripcion text
 )
+BEGIN
+	-- Verifying the Cedula is not null and is not taken
+	if Cedula is NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Ingrese una cédula';
+	end if;
+
+	-- checking the FechaNacimiento is before today
+	if FechaNacimiento > now() then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'La fecha de nacimiento no puede ser mayor a la fecha actual';
+	end if;
+
+	select Cedula from Usuario
+		where Cedula = Cedula
+		and Active = 1
+		limit 1 into @cedula;
+
+	-- if the @cedula is not null, then the cedula is taken
+	if @cedula is not NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'La cédula ya está registrada';
+	end if;
+
+	if Correo is NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'Ingrese un correo';
+	end if;
+
+	-- checking if the email is taken
+	select Correo from Usuario
+		where Correo = Correo
+		and Active = 1
+		limit 1 into @correo;
+
+	-- if the @correo is not null, then the email is taken
+	if @correo is not NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'El correo ya está registrado';
+	end if;
+
+	-- checking the email structure is correct
+	if not (Correo like '%@%' and Correo like '%.%') then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'El correo no tiene un formato válido';
+	end if;
+
+	-- NOTE: The password will come already hashed by the API
+	-- Registering the user
+	start transaction;
+		insert into Usuario (
+			Cedula, Nombre,
+			Correo, Contrasena, Telefono,
+			Direccion, FechaNacimiento
+		) values (
+			Cedula, Nombre,
+			Correo, Contrasena, Telefono,
+			Direccion, FechaNacimiento
+		);
+
+		-- inserting into the Cliente table 
+		insert into Cliente (Cedula, Descripcion) values (Cedula, Descripcion);
+	commit;
+END //
+delimiter ;
 
 -- TODO: remove it
 call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
 call checkSession('token', 'ip', 'userAgent');
+call standardSignup('Joel', '1234567890', 'vetzy@olyndha.com','123', '1234567890', 'Calle 1', '1700-01-01', 'Descripción');
+	IN Nombre varchar(100),
+	IN Cedula char(10),
+	IN Correo varchar(255),
+	IN Contrasena char(64),
+	IN Telefono char(10),
+	IN Direccion varchar(255),
+	IN FechaNacimiento date,
+	IN Descripcion text
+
 
