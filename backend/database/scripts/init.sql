@@ -178,64 +178,65 @@ delimiter //
 drop function if exists getRol;
 create function getRol(Cedula char(10)) returns varchar(10) deterministic
 begin
+	declare role varchar(10);
 	-- determining the role
 	select Cedula
 		from Administrador a
 		left join Empleado e on a.cedula = e.cedula
 		where a.cedula = Cedula
-		limit 1 into @rol;
+		limit 1 into role;
 	
-	if @rol is not null then
+	if role is not null then
 		return 'admin';
 	end if;
 
 	select Cedula
 		from Empleado e
 		where e.cedula = Cedula
-		limit 1 into @rol;
+		limit 1 into role;
 
-	if @rol is not null then
+	if role is not null then
 		return 'empleado';
 	end if;
 
 	select Cedula
 		from Cliente c
 		where c.cedula = Cedula
-		limit 1 into @rol;
+		limit 1 into role;
 
-	if @rol is not null then
+	if role is not null then
 		return 'cliente';
 	end if;
 
-	return @rol;
+	return role;
 end //
 delimiter ;
 -- Procedures
 
 drop procedure if exists checkSession;
-
 delimiter //
 create procedure checkSession(
-	IN Token char(64),
-	IN IP char(15),
-	IN UserAgent text
+	IN Token char(64)
 )
 begin
+	set @cedula = null;
+	set @token = null;
 	-- selecting all the records from token and saving into a variable
 	select Cedula, Token from Session 
 		where Token = Token 
-		and IP = IP 
-		and Device = UserAgent 
 		and LoggedOut is NULL
 		limit 1 into @cedula, @token;
 
 	-- if the variable is empty, then the token is not valid
 	if @cedula is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Token no válido';
+		signal sqlstate '45000' set message_text = 'Sesión no válida';
 	end if;
 
-	select @cedula as Cedula, @token as Token;
+	-- extracting role 
+	select getRol(@cedula) into @rol;
+
+	select @cedula as Cedula, @token as Token, @rol as Rol;
 end //
 delimiter ;
 
@@ -262,6 +263,9 @@ begin
 		signal sqlstate '45000' set message_text = 'Ya hay una sesión iniciada';
 	end if;
 
+	set @cedula = null;
+	set @password = null;
+	set @nombre = null;
 	-- selecting all the records from token and saving into a variable
 	select Contrasena, Cedula, Nombre from Usuario
 		where Correo = Email
@@ -279,6 +283,7 @@ begin
 		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
 	end if;
 
+	set @activo = null;
 	-- checking if the user is Active
 	select Active from Usuario
 		where Correo = Email
@@ -314,7 +319,7 @@ end //
 delimiter ;
 
 delimiter //
-drop procedure if exists logout;
+drop procedure if exists standardSignup;
 -- este proceso se encarga del registro normal de cliente
 create procedure standardSignup(
 	IN Nombre varchar(100),
@@ -339,6 +344,7 @@ BEGIN
 		signal sqlstate '45000' set message_text = 'La fecha de nacimiento no puede ser mayor a la fecha actual';
 	end if;
 
+	set @cedula = null;
 	select Cedula from Usuario
 		where Cedula = Cedula
 		and Active = 1
@@ -355,6 +361,7 @@ BEGIN
 		signal sqlstate '45000' set message_text = 'Ingrese un correo';
 	end if;
 
+	set @correo = null;
 	-- checking if the email is taken
 	select Correo from Usuario
 		where Correo = Correo
@@ -392,17 +399,36 @@ BEGIN
 END //
 delimiter ;
 
+drop procedure if exists logout;
+delimiter //
+create procedure logout(
+	IN Token char(32)
+)
+begin
+	set @cedula = null;
+
+	-- checking if the token is valid
+	select Cedula from Session
+		where Token = Token
+		and LoggedOut is NULL
+		limit 1 into @cedula;
+
+	-- if the @cedula is null, then the token is not valid
+	if @cedula is NULL then
+		-- raising an error
+		signal sqlstate '45000' set message_text = 'No existe una sesión iniciada';
+	end if;
+
+	-- updating the session table
+	start transaction;
+		update Session set LoggedOut = now()
+			where Token = Token;
+	commit;
+end //
+delimiter ;
+
 -- TODO: remove it
 call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
 call checkSession('token', 'ip', 'userAgent');
 call standardSignup('Joel', '1234567890', 'vetzy@olyndha.com','123', '1234567890', 'Calle 1', '1700-01-01', 'Descripción');
-	IN Nombre varchar(100),
-	IN Cedula char(10),
-	IN Correo varchar(255),
-	IN Contrasena char(64),
-	IN Telefono char(10),
-	IN Direccion varchar(255),
-	IN FechaNacimiento date,
-	IN Descripcion text
-
 
