@@ -1,0 +1,14 @@
+{
+  "name": "olyndha",
+  "version": "1.0.0",
+  "description": "olyndha",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "olyndha y Lady",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
