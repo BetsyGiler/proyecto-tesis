@@ -22,4 +22,4 @@ echo "Starting images"
 docker-compose up -d
 
 docker exec -d olyndha_frontend npm start
-
+docker exec -d olyndha_backend nodemon ./src/server.ts
