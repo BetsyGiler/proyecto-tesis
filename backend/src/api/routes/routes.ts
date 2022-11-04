@@ -5,6 +5,7 @@ export enum AuthRoutes {
 	LOGIN = '/auth/login',
 	REGISTER = '/auth/register',
 	CHECK_SESSION = '/auth/check-session',
+	LOGOUT = '/auth/logout',
 };
 
 export enum Routes {

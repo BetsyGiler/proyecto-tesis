@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS Session(
 	Device varchar(150) null default 'desconocido',
 	CreatedAt datetime not null,
 	LoggedOut datetime null,
-	constraint CP_SESSION primary key (Cedula),
+	constraint CP_SESSION primary key (Token),
 	constraint FK_Usuario foreign key(Cedula) references Usuario(Cedula)
 	on update cascade on delete no action
 )ENGINE=InnoDB;
@@ -221,22 +221,24 @@ create procedure checkSession(
 begin
 	set @cedula = null;
 	set @token = null;
+	set @name = null;
+	set @email = null;
 	-- selecting all the records from token and saving into a variable
-	select Cedula, Token from Session 
+	select Usuario.Cedula, Token, Nombre, Correo from Session join Usuario on Session.Cedula = Usuario.Cedula
 		where Token = Token 
 		and LoggedOut is NULL
-		limit 1 into @cedula, @token;
+		limit 1 into @cedula, @token, @name, @email;
 
 	-- if the variable is empty, then the token is not valid
 	if @cedula is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Sesión no válida';
+		signal sqlstate '45000' set message_text = 'invalid_session';
 	end if;
 
 	-- extracting role 
 	select getRol(@cedula) into @rol;
 
-	select @cedula as Cedula, @token as Token, @rol as Rol;
+	select @cedula as Cedula, @token as Token, @rol as Rol, @name as Nombre, @email as Correo;
 end //
 delimiter ;
 
@@ -260,7 +262,7 @@ begin
 	-- if @token is not null, then there is a session already
 	if @token is not null then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Ya hay una sesión iniciada';
+		signal sqlstate '45000' set message_text = 'already_on_session';
 	end if;
 
 	set @cedula = null;
@@ -268,7 +270,7 @@ begin
 	set @nombre = null;
 	-- selecting all the records from token and saving into a variable
 	select Contrasena, Cedula, Nombre from Usuario
-		where ICorreo = Email
+		where Correo = Email
 		limit 1 into @password, @cedula, @nombre;
 
 	-- if the @password is emoty then the email is not valid
@@ -292,7 +294,7 @@ begin
 	-- if @activo is false then the user deleted the account
 	if @activo = 0 then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Usuario inactivo';
+		signal sqlstate '45000' set message_text = 'user_inactive';
 	end if;
 
 	-- updating the session table
@@ -308,7 +310,7 @@ begin
 		if @rol is NULL then
 			rollback;
 			-- raising an error
-			signal sqlstate '45000' set message_text = 'Problema al obtener el rol. Contacte con personal de TI.';
+			signal sqlstate '45000' set message_text = 'problem_getting_role_contact_TI';
 		end if;
 	commit;
 
@@ -403,33 +405,34 @@ delimiter ;
 drop procedure if exists logout;
 delimiter //
 create procedure logout(
-	IN Token char(32)
+	IN IToken char(32)
 )
 begin
 	set @cedula = null;
 
 	-- checking if the token is valid
 	select Cedula from Session
-		where Token = Token
+		where Token = IToken
 		and LoggedOut is NULL
 		limit 1 into @cedula;
 
 	-- if the @cedula is null, then the token is not valid
 	if @cedula is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'No existe una sesión iniciada';
+		signal sqlstate '45000' set message_text = 'no_active_session';
 	end if;
 
 	-- updating the session table
 	start transaction;
 		update Session set LoggedOut = now()
-			where Token = Token;
+			where Token = IToken;
+		select "logout_successfully" as message;
 	commit;
 end //
 delimiter ;
 
 -- TODO: remove it
-call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
-call checkSession('token', 'ip', 'userAgent');
-call standardSignup('Joel', '1234567890', 'vetzy@olyndha.com','123', '1234567890', 'Calle 1', '1700-01-01', 'Descripción');
-
+-- call login('joel@joel.com', '12323232', '12312312', 'sadasdas');
+-- call checkSession('token', 'ip', 'userAgent');
+-- call standardSignup('Joel', '1234567890', 'vetzy@olyndha.com','123', '1234567890', 'Calle 1', '1700-01-01', 'Descripción');
+--

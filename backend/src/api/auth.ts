@@ -2,8 +2,9 @@ import express from 'express';
 import UserEntity from '../domain/entity/user';
 import LoginUseCase from '../domain/usecases/auth/login';
 import {AuthRoutes} from './routes/routes';
-import bcrypt from 'bcrypt';
 import RegisterUseCase from '../domain/usecases/auth/register';
+import CheckSessionUseCase from '../domain/usecases/auth/check_session';
+import LogoutUseCase from '../domain/usecases/auth/logout';
 
 const app = express();
 
@@ -14,6 +15,29 @@ interface ILogin {
 	ip?: string;
 	userAgent?: string;
 }
+
+app.post(AuthRoutes.LOGOUT, async (req, res) => {
+	const token = req.body.token;
+	const logoutUseCase = new LogoutUseCase();
+	try {
+		const response = await logoutUseCase.call({token});
+		res.json(response);
+	}catch(e: any) {
+		return res.status(400).json({error: e.sqlMessage});
+	}
+});
+
+app.post(AuthRoutes.CHECK_SESSION, async (req, res) => {
+	const token = req.body.token;
+
+	const checkSession = new CheckSessionUseCase();
+	try {
+		const session = await checkSession.call({token});
+		return res.json(session);
+	} catch (e: any) {
+		return res.status(400).json({error: e.sqlMessage});
+	}
+});
 
 /**
  * @description Login endpoint 
@@ -58,7 +82,7 @@ app.post(AuthRoutes.REGISTER, async (req, res) => {
 		});
 
 		return res.json(result);
-	}catch (e: any) {
+	} catch (e: any) {
 		return res.status(400).json({
 			error: {message: e.sqlMessage},
 		});

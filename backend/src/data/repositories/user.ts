@@ -1,8 +1,10 @@
+import LoginResponse from "../../core/types/auth/response.login";
+import LogoutResponse from "../../core/types/auth/response.logout";
 import RegisterResponse from "../../core/types/auth/response.register";
+import SessionEntity from "../../domain/entity/session";
 import UserEntity from "../../domain/entity/user";
 import IUserRepository from "../../domain/repository/user";
 import MySQLDatasource from "../datasource/mysql";
-import UserModel from "../models/user";
 
 /**
  * @class UserRepository
@@ -28,7 +30,7 @@ export default class UserRepository implements IUserRepository {
 		password: string,
 		ip?: string,
 		userAgent?: string
-	): Promise<UserModel|undefined> {
+	): Promise<LoginResponse> {
 		return await this.userDatasource.login(email, password, ip, userAgent);
 	}
 
@@ -40,11 +42,12 @@ export default class UserRepository implements IUserRepository {
 		return await this.userDatasource.register(user, password);
 	}
 
-	checkSession(token: string): Promise<boolean> {
-		throw new Error("Method not implemented.");
+	public async checkSession(token: string): Promise<SessionEntity> {
+		return await this.userDatasource.checkSession(token);
 	}
-	logout(token: string): Promise<boolean> {
-		throw new Error("Method not implemented.");
+
+	public async logout(token: string): Promise<LogoutResponse> {
+		return await this.userDatasource.logout(token);
 	}
 
 }
