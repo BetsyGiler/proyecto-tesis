@@ -10,15 +10,17 @@ export default class UserModel implements UserEntity {
 	address?: string | undefined;
 	isActive: boolean;
 	birthday?: Date | undefined;
+	description?: string | undefined;
 
 	constructor(data: UserEntity) {
+		this.description = data.description;
 		this.cedula = data.cedula;
 		this.name = data.name;
 		this.cellphone = data.cellphone;
 		this.email = data.email;
 		this.sex = data.sex;
 		this.address = data.address;
-		this.isActive = data.isActive;
+		this.isActive = true;
 		this.birthday = data.birthday;
 	}
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import auth from './api/auth';
 import dotenv from 'dotenv';
+import bodyParser from 'body-parser';
 
 class Server {
 	private app: express.Application;
@@ -11,6 +12,9 @@ class Server {
 		dotenv.config();
 		// setting up express
 		this.app = express();
+		// setting up body parser to support x-www-form-urlencoded
+		this.app.use(bodyParser.urlencoded({ extended: false }));
+		this.app.use(bodyParser.json());
 		// using defined routes
 		this.app.use(auth);
 		this.port = Number(process.env.API_PORT);

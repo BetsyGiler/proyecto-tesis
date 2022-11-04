@@ -9,6 +9,7 @@ interface UserEntity {
 	address?: string;
 	isActive: boolean;
 	birthday?: Date;
+	description?: string;
 }
 
 export default UserEntity;

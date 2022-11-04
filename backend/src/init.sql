@@ -268,19 +268,19 @@ begin
 	set @nombre = null;
 	-- selecting all the records from token and saving into a variable
 	select Contrasena, Cedula, Nombre from Usuario
-		where Correo = Email
+		where ICorreo = Email
 		limit 1 into @password, @cedula, @nombre;
 
 	-- if the @password is emoty then the email is not valid
 	if @password is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
+		signal sqlstate '45000' set message_text = 'invalid_credentials';
 	end if;
 
 	-- checking if the password is correct
 	if @password != Password then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Credenciales no válidas';
+		signal sqlstate '45000' set message_text = 'invalid_credentials';
 	end if;
 
 	set @activo = null;
@@ -323,8 +323,8 @@ drop procedure if exists standardSignup;
 -- este proceso se encarga del registro normal de cliente
 create procedure standardSignup(
 	IN Nombre varchar(100),
-	IN Cedula char(10),
-	IN Correo varchar(255),
+	IN ICedula char(10),
+	IN ICorreo varchar(255),
 	IN Contrasena char(64),
 	IN Telefono char(10),
 	IN Direccion varchar(255),
@@ -333,51 +333,51 @@ create procedure standardSignup(
 )
 BEGIN
 	-- Verifying the Cedula is not null and is not taken
-	if Cedula is NULL then
+	if ICedula is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Ingrese una cédula';
+		signal sqlstate '45000' set message_text = 'missing_cedula';
 	end if;
 
 	-- checking the FechaNacimiento is before today
 	if FechaNacimiento > now() then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'La fecha de nacimiento no puede ser mayor a la fecha actual';
+		signal sqlstate '45000' set message_text = 'malformed_birthday';
 	end if;
 
 	set @cedula = null;
 	select Cedula from Usuario
-		where Cedula = Cedula
+		where Cedula = ICedula
 		and Active = 1
 		limit 1 into @cedula;
 
 	-- if the @cedula is not null, then the cedula is taken
 	if @cedula is not NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'La cédula ya está registrada';
+		signal sqlstate '45000' set message_text = 'cedula_already_taken';
 	end if;
 
-	if Correo is NULL then
+	if ICorreo is NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'Ingrese un correo';
+		signal sqlstate '45000' set message_text = 'missing_email';
 	end if;
 
 	set @correo = null;
 	-- checking if the email is taken
 	select Correo from Usuario
-		where Correo = Correo
+		where Correo = ICorreo
 		and Active = 1
 		limit 1 into @correo;
 
 	-- if the @correo is not null, then the email is taken
 	if @correo is not NULL then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'El correo ya está registrado';
+		signal sqlstate '45000' set message_text = 'email_already_taken';
 	end if;
 
 	-- checking the email structure is correct
-	if not (Correo like '%@%' and Correo like '%.%') then
+	if not (ICorreo like '%@%' and ICorreo like '%.%') then
 		-- raising an error
-		signal sqlstate '45000' set message_text = 'El correo no tiene un formato válido';
+		signal sqlstate '45000' set message_text = 'malformed_email';
 	end if;
 
 	-- NOTE: The password will come already hashed by the API
@@ -388,13 +388,14 @@ BEGIN
 			Correo, Contrasena, Telefono,
 			Direccion, FechaNacimiento
 		) values (
-			Cedula, Nombre,
-			Correo, Contrasena, Telefono,
+			ICedula, Nombre,
+			ICorreo, Contrasena, Telefono,
 			Direccion, FechaNacimiento
 		);
 
 		-- inserting into the Cliente table 
-		insert into Cliente (Cedula, Descripcion) values (Cedula, Descripcion);
+		insert into Cliente (Cedula, Descripcion) values (ICedula, Descripcion);
+		select "user_created_successfully" as message;
 	commit;
 END //
 delimiter ;

@@ -8,6 +8,8 @@ import UserRepository from "../../../data/repositories/user";
 interface LoginParams {
 	email: string;
 	password: string;
+	ip?: string;
+	userAgent?: string;
 }
 
 interface LoginResponse {
@@ -22,7 +24,7 @@ export default class LoginUseCase extends UseCase<LoginResponse, LoginParams, Us
 	}
 
 	async call(params: LoginParams): Promise<LoginResponse> {
-		const user = await this.repository.login(params.email, params.password);
+		const user = await this.repository.login(params.email, params.password, params.ip, params.userAgent);
 		return {
 			user,
 			error: "No se puede iniciar sesion",
