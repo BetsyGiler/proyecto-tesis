@@ -1,11 +1,16 @@
 {
-  "ts-node": {
-	"esm": true
-  },
   "compilerOptions": {
-	  "esModuleInterop": true,
-	  "moduleResolution": "node",
-	  "module": "es6",
-	  "target": "es6"
+    "target": "es2016",
+    "lib": ["es6"],
+    "module": "commonjs",
+    "rootDir": "src",
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "outDir": "build",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "noImplicitAny": true,
+    "skipLibCheck": true
   }
 }
