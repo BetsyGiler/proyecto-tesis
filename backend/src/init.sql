@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS Usuario(
     FechaNacimiento date,
     Direccion Varchar(150),
     Active boolean null default true,
+    Rol enum('cliente', 'empleado', 'administrador'),
     constraint CP_USUARIO primary key (Cedula)
 )ENGINE = InnoDB;
 
