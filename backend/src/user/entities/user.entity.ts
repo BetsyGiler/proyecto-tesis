@@ -57,7 +57,7 @@ export class User {
   @BeforeInsert()
   beforeInsert() {
     this.active = true;
-    this.email = this.email.toLowerCase().trim();
+    this.email = this.email?.toLowerCase().trim();
   }
 
   @BeforeUpdate()

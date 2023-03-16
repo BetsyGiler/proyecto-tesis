@@ -42,7 +42,6 @@ export class UserService {
       delete dbUser.password;
       return dbUser;
     } catch (e) {
-      console.error(e);
       if (e.code === 'ER_DUP_ENTRY' && e.sqlMessage.includes('Correo')) {
         throw new BadRequestException({
           error: 'El correo ya existe',
@@ -62,15 +61,24 @@ export class UserService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  findOne(identification: string) {
+    return this.userRepository.findOne({
+      where: {
+        identification,
+      }
+    });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
+  async update(identification: string, updateUserDto: UpdateUserDto) {
+    const user = this.userRepository.create(updateUserDto);
+    const updated = await this.userRepository.update(identification, user);
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+    if (updated.affected < 1) {
+      throw new BadRequestException({
+        error: 'El usuario no existe',
+      });
+    }
+
+    return { updated: true };
   }
 }
