@@ -21,7 +21,6 @@ export class AuthService {
     // looking for a user that matches the email
     const user = await this.userRepository.findOneBy({ email });
 
-    console.log(user)
     if (!user) {
       throw new UnauthorizedException('Credenciales incorrectas');
     }

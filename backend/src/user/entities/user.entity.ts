@@ -28,7 +28,7 @@ export class User {
   @Column({ name: "Telefono" })
   phone: string;
 
-  @Column({ name: "Correo" })
+  @Column({ name: "Correo", unique: true, })
   email: string;
 
   @Column({ name: "Contrasena" })

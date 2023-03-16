@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS Usuario(
 	Cedula char(10),
     Nombre Varchar(100) not null,
     Telefono char(10) not null,
-    Correo varchar(100) not null,
+    Correo varchar(100) unique not null,
     Contrasena char(64) not null,
     sexo enum('M','F') not null, 
     FechaNacimiento date,

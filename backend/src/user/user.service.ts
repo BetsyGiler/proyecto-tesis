@@ -19,6 +19,18 @@ export class UserService {
     const password = createUserDto.password;
     const hashedPassword = bcrypt.hashSync(password, 10);
 
+    const userExists = await this.userRepository.findOne({
+      where: {
+        identification: createUserDto.identification,
+      }
+    });
+
+    if (userExists) {
+      throw new BadRequestException({
+        error: 'El usuario ya existe',
+      });
+    }
+
     const user = this.userRepository.create({
       ...createUserDto,
       password: hashedPassword,
@@ -30,9 +42,8 @@ export class UserService {
       delete dbUser.password;
       return dbUser;
     } catch (e) {
-
       console.error(e);
-      if (e.code === '23505' && e.detail.includes('email')) {
+      if (e.code === 'ER_DUP_ENTRY' && e.sqlMessage.includes('Correo')) {
         throw new BadRequestException({
           error: 'El correo ya existe',
           detail: e.detail,
@@ -43,8 +54,12 @@ export class UserService {
     throw new InternalServerErrorException();
   }
 
-  findAll() {
-    return this.userRepository.find();
+  findAllClients() {
+    return this.userRepository.find({
+      where: {
+        role: 'cliente',
+      }
+    });
   }
 
   findOne(id: number) {
