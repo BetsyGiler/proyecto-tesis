@@ -19,25 +19,25 @@ services:
       # Password for the root user
       MYSQL_ROOT_PASSWORD: olyndha
       MYSQL_DATABASE: tesisolyndha
-  olyndha_frontend:
-    image: olyndha_frontend
-    container_name: olyndha_frontend
-    volumes:
-      - ./react-client/:/usr/src/app/
-    tty: true
-    ports:
-      - 3000:3000
-  olyndha_backend:
-    ports:
-      - 8800:8800
-    volumes:
-      - ./backend/:/backend/
-    image: olyndha_backend # Image comes from Dockerfile at ./backend
-    container_name: olyndha_backend
-    tty: true
-    environment:
-      MYSQL_USERNAME: root
-      MYSQL_PASSWORD: olyndha
-      MYSQL_DATABASE: tesisolyndha
-      MYSQL_HOST: olyndha_mysql # stablish connection with MySQL
-      API_PORT: 8800 # where to serve the API
+  # olyndha_frontend:
+  #   image: olyndha_frontend
+  #   container_name: olyndha_frontend
+  #   volumes:
+  #     - ./react-client/:/usr/src/app/
+  #   tty: true
+  #   ports:
+  #     - 3000:3000
+  # olyndha_backend:
+  #   ports:
+  #     - 8800:8800
+  #   volumes:
+  #     - ./backend/:/backend/
+  #   image: olyndha_backend # Image comes from Dockerfile at ./backend
+  #   container_name: olyndha_backend
+  #   tty: true
+  #   environment:
+  #     MYSQL_USERNAME: root
+  #     MYSQL_PASSWORD: olyndha
+  #     MYSQL_DATABASE: tesisolyndha
+  #     MYSQL_HOST: olyndha_mysql # stablish connection with MySQL
+  #     API_PORT: 8800 # where to serve the API

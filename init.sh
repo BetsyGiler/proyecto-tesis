@@ -12,14 +12,14 @@ cd $CURR_DIR/backend
 # building backend image
 docker build -t olyndha_backend .
 
-cd $CURR_DIR/react-client
-
-# building frontend image
-docker build -t olyndha_frontend .
+# cd $CURR_DIR/react-client
+#
+# # building frontend image
+# docker build -t olyndha_frontend .
 
 cd $CURR_DIR
 echo "Starting images"
 docker-compose up -d
 
-docker exec -d olyndha_frontend npm start
-docker exec -d olyndha_backend npm run start:dev
+# docker exec -d olyndha_frontend npm start
+docker exec -d olyndha_backend yarn run start:dev
