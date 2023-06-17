@@ -1,43 +1,45 @@
 version: "3.7"
 services:
-  olyndha_mysql:
-    image: mysql:8.0.30-debian
-    # NOTE: use of "mysql_native_password" is not recommended:
-    # https://dev.mysql.com/doc/refman/8.0/en/upgrading-from-previous-series.html#upgrade-caching-sha2-password
-    # (this is just an example, not intended to be a production configuration)
-    command: --default-authentication-plugin=mysql_native_password
-    container_name: olyndha_mysql
-    restart: always
-    ports:
-      - 3306:3306
+  backend:
+    image: delivery_trans_api
+    container_name: delivery_trans_api
+    command: sh -c "yarn install && yarn run start:dev"
+    restart: on-failure
+    tty: true
     volumes:
-      # All the data will be persisted at ./db/data on the host 
-      - ./db/data/:/var/lib/mysql
-      # executing a first set of SQL code to initialize the database
-      - "./backend/src/init.sql:/docker-entrypoint-initdb.d/init.sql"
+      - ./backend:/app/backend/transactional_api
+    depends_on:
+      - db
+    ports:
+      - 8500:8500
+    networks:
+      - app-network
     environment:
-      # Password for the root user
-      MYSQL_ROOT_PASSWORD: olyndha
-      MYSQL_DATABASE: tesisolyndha
-  # olyndha_frontend:
-  #   image: olyndha_frontend
-  #   container_name: olyndha_frontend
-  #   volumes:
-  #     - ./react-client/:/usr/src/app/
-  #   tty: true
-  #   ports:
-  #     - 3000:3000
-  # olyndha_backend:
-  #   ports:
-  #     - 8800:8800
-  #   volumes:
-  #     - ./backend/:/backend/
-  #   image: olyndha_backend # Image comes from Dockerfile at ./backend
-  #   container_name: olyndha_backend
-  #   tty: true
-  #   environment:
-  #     MYSQL_USERNAME: root
-  #     MYSQL_PASSWORD: olyndha
-  #     MYSQL_DATABASE: tesisolyndha
-  #     MYSQL_HOST: olyndha_mysql # stablish connection with MySQL
-  #     API_PORT: 8800 # where to serve the API
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_NAME=delivery
+      - HASH_SALTS=10
+      - JWT_EXPIRATION_TIME=300
+      - JWT_REFRESH_EXPIRATION_TIME=2592000
+      - API_PORT=8500
+  db:
+    image: postgres:alpine3.18
+    container_name: delivery_postgres
+    restart: on-failure
+    tty: true
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=delivery
+    ports:
+      - 5432:5432
+    networks:
+      - app-network
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data
+      - ./database:/docker-entrypoint-initdb.d
+networks:
+  app-network:
+    driver: bridge

@@ -1,12 +1,13 @@
-FROM node:current-alpine3.16
+FROM node:lts-alpine3.18
 
-# Create app directory
-WORKDIR /backend
+WORKDIR /app/backend/transactional_api
 
-# Install app dependencies
 COPY package*.json ./
-
-# Bundle app source
+COPY yarn.lock ./
 COPY . .
 
-RUN yarn
+# adding Nest.js
+RUN npm install -g @nestjs/cli
+RUN yarn install
+
+EXPOSE 8500

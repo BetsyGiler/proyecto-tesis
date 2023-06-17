@@ -1,58 +1,154 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/entities/user.entity';
-import { Repository } from 'typeorm';
-import { LoginDto } from './dto/login.dto';
-import { IJWTPayload } from './interfaces/jwt-payload.interface';
-import * as bcrypt from 'bcrypt';
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { User } from "src/user/entities/user.entity";
+import { SessionService } from "./session.service";
+import { Repository } from "typeorm";
+import { SignUpDto } from "./dto/register.dto";
+import * as bcrypt from "bcrypt";
+import environment from "src/config/env.config";
+import { IRegisterResponse } from "./interfaces/register-response.interface";
+import { SignInDto } from "./dto/login.dto";
+import { ILoginResponse } from "./interfaces/login-response.interface";
+import { JwtStrategyOutput } from "./interfaces/strategy-output.interface";
 
 @Injectable()
 export class AuthService {
-
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
+    private readonly sessionService: SessionService
   ) { }
 
-  async login(loginDto: LoginDto): Promise<any> {
-    const { email, password } = loginDto;
-    // looking for a user that matches the email
-    const user = await this.userRepository.findOneBy({ email });
+  async register(user: SignUpDto): Promise<IRegisterResponse> {
+    // hashing the password
+    const { password, deviceFingerprint } = user;
+    const hashedPassword = bcrypt.hashSync(password, environment.hashSalts)
+
+    const newUser = this.userRepository.create({
+      ...user,
+      password: hashedPassword,
+    });
+
+    let createdUser: User;
+
+    try {
+      createdUser = await this.userRepository.save(
+        newUser,
+      );
+    } catch (e) {
+      if (e.code === '23505' && e.detail.includes('email')) {
+        throw new BadRequestException({
+          error: 'El correo ya existe',
+          detail: e.detail,
+        });
+      }
+    }
+
+    // generating the refresh token linked to a determined deviceId &
+    // user
+    const sessionId = await this.sessionService.createRefreshToken(
+      null,
+      createdUser,
+      deviceFingerprint,
+    );
+
+    // generatig access token based on the new refresh token
+    const accessToken = await this.sessionService.createAccessToken(
+      sessionId,
+      newUser.id,
+    );
+
+    // removing the password
+    delete createdUser.password
+
+    return {
+      user: createdUser,
+      accessToken,
+    };
+  }
+
+  async login(user: SignInDto): Promise<ILoginResponse> {
+    const { email, password, deviceFingerprint } = user;
+
+    // verifying existence of the user
+    const userFound = await this.userRepository.findOne({
+      where: { email },
+    });
+
+    if (!userFound) {
+      throw new NotFoundException("Credenciales incorrectas");
+    }
+
+    // checking credentials
+    const isPasswordCorrect = bcrypt.compareSync(
+      password,
+      userFound.password
+    );
+
+    if (!isPasswordCorrect) {
+      throw new NotFoundException("Credenciales incorrectas");
+    }
+
+    // revoking all the active sessions for the current [deviceFingerprint] so a 
+    // device could have only one active session
+    await this.sessionService.revokeSessionsByFingerprint(
+      deviceFingerprint,
+      userFound.id,
+    );
+
+    // generating the refresh token. Evrytime the user logs in a new 
+    // device ID is generated
+    const sessionId = await this.sessionService.createRefreshToken(
+      null,
+      userFound,
+      deviceFingerprint,
+    );
+
+    // generating access token
+    const accessToken = await this.sessionService.createAccessToken(
+      sessionId,
+      userFound.id,
+    );
+
+    // removing the password so it's not sent to the client
+    delete userFound.password
+
+    return {
+      user: userFound,
+      accessToken,
+    };
+  }
+
+  async checkSession(guardOutput: JwtStrategyOutput) {
+
+    // If the request flow reaches this point then it means the guard 
+    // was able to refresh/validate the AT against the RT so everything
+    // is ok so far
+    const userId = guardOutput.session.userId;
+
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
 
     if (!user) {
-      throw new UnauthorizedException('Credenciales incorrectas');
+      throw new NotFoundException("Credenciales incorrectas");
     }
-
-    // comparing password using bcrypt
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if (!isMatch) {
-      throw new UnauthorizedException('Credenciales incorrectas');
-    }
-
-    // generating the JWT getJwtToken
-    const payload: IJWTPayload = {
-      email: user.email,
-    };
-
-    // generating tokens
-    const token = this.getJwtToken(payload);
-
-    // deleting sensitive data before sending the response
-    delete user.password;
 
     return {
       user,
-      token,
+      accessToken: guardOutput.accessToken,
     };
   }
 
-  private getJwtToken(payload: IJWTPayload) {
-    const token = this.jwtService.sign(payload);
+  async logout(guardOutput: JwtStrategyOutput) {
 
-    return token;
+    const { userId, deviceId } = guardOutput.session;
+
+    // revoking all the active sessions of the [userId] for the target [deviceId]
+    await this.sessionService.revokeSessionsByFingerprint(deviceId, userId);
+
+    return {
+      accessToken: null,
+    };
   }
-
 }
