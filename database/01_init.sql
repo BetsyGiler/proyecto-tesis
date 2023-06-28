@@ -8,11 +8,12 @@ CREATE TYPE "Roles" AS ENUM (
 CREATE TABLE "Usuarios" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v1()),
   "nombre" varchar(255) NOT NULL,
-  "rol" Roles DEFAULT 'admin',
+  "rol" "Roles" DEFAULT 'cliente',
   "imagenPerfil" text,
-  "email" varchar(255) NOT NULL,
+  "email" varchar(255) UNIQUE NOT NULL,
   "ciudad" varchar(200),
   "barrio" varchar(200),
+  "numeroTelefono" text,
   "provincia" varchar(200),
   "password" varchar(64) NOT NULL
 );
@@ -33,7 +34,7 @@ CREATE TABLE "Proveedor" (
 CREATE TABLE "Productos" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v1()),
   "nombre" varchar(300) NOT NULL,
-  "pvp" "decimal(6, 2)" NOT NULL,
+  "pvp" decimal(6, 2) NOT NULL,
   "imagenPrincipalUrl" text,
   "descripcion" text,
   "proveedorId" uuid NOT NULL
@@ -43,7 +44,7 @@ CREATE TABLE "Imagenes" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v1()),
   "url" text NOT NULL,
   "productoId" uuid NOT NULL,
-  "fechaCreacion" timestamptz DEFAULT (CURRENT_TIMESTAMPT)
+  "fechaCreacion" timestamptz DEFAULT (CURRENT_TIMESTAMP)
 );
 
 CREATE TABLE "Pedidos" (
@@ -56,7 +57,7 @@ CREATE TABLE "PedidosProductos" (
   "id" uuid PRIMARY KEY DEFAULT (uuid_generate_v1()),
   "pedidoId" uuid NOT NULL,
   "productoId" uuid NOT NULL,
-  "valorCompra" "decimal(10, 3)" NOT NULL,
+  "valorCompra" decimal(10, 3) NOT NULL,
   "fechaCreacion" timestamptz DEFAULT (CURRENT_TIMESTAMP)
 );
 
@@ -65,7 +66,7 @@ CREATE TABLE "Servicios" (
   "usuarioId" uuid NOT NULL,
   "nombre" varchar(300) NOT NULL,
   "descripcion" text,
-  "costo" "decimal(10, 2)" NOT NULL
+  "costo" decimal(10, 2) NOT NULL
 );
 
 CREATE TABLE "Notificaciones" (

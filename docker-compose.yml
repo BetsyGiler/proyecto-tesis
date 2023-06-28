@@ -1,13 +1,13 @@
 version: "3.7"
 services:
   backend:
-    image: delivery_trans_api
-    container_name: delivery_trans_api
+    image: olyndha_backend
+    container_name: olyndha_backend
     command: sh -c "yarn install && yarn run start:dev"
     restart: on-failure
     tty: true
     volumes:
-      - ./backend:/app/backend/transactional_api
+      - ./backend:/app/backend/
     depends_on:
       - db
     ports:
@@ -19,20 +19,20 @@ services:
       - DB_PORT=5432
       - DB_USER=postgres
       - DB_PASSWORD=postgres
-      - DB_NAME=delivery
+      - DB_NAME=olyndha
       - HASH_SALTS=10
       - JWT_EXPIRATION_TIME=300
       - JWT_REFRESH_EXPIRATION_TIME=2592000
       - API_PORT=8500
   db:
     image: postgres:alpine3.18
-    container_name: delivery_postgres
+    container_name: olyndha_postgres
     restart: on-failure
     tty: true
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=delivery
+      - POSTGRES_DB=olyndha
     ports:
       - 5432:5432
     networks:

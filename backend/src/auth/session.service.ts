@@ -40,13 +40,8 @@ export class SessionService {
 
     // creating the session object
     const session = this.sessionRepository.create({
-      id: rtId || uuidv4(),
       userId: user.id,
-      // TODO: encrypt [deviceId]
-      deviceId: deviceFingerprint,
       refreshToken,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     const createdSession = await this.sessionRepository.save(session);
@@ -78,7 +73,7 @@ export class SessionService {
 
     // updating the current refresh token
     await this.sessionRepository.update(rtId, {
-      refreshToken, updatedAt: new Date()
+      refreshToken,
     });
   }
 
@@ -228,12 +223,9 @@ export class SessionService {
   /**
    * This method will revoke all the sessions for a determined [deviceFingerprint]
    * and [userId]
-   *
-   * @param {string} deviceFingerprint
    */
-  async revokeSessionsByFingerprint(deviceFingerprint: string, userId: string): Promise<void> {
+  async revokeSessionsByFingerprint(userId: string): Promise<void> {
     await this.sessionRepository.delete({
-      deviceId: deviceFingerprint,
       userId
     });
   }

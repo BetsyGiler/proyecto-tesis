@@ -20,6 +20,3 @@ docker build -t olyndha_backend .
 cd $CURR_DIR
 echo "Starting images"
 docker-compose up -d
-
-# docker exec -d olyndha_frontend npm start
-docker exec -d olyndha_backend yarn run start:dev

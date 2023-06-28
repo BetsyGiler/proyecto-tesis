@@ -8,11 +8,10 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt.guard';
 import { UserService } from 'src/user/user.service';
-import { UtilsModule } from 'src/global/global.module';
 import { Session } from './entities/session.entity';
 import { AdminGuard } from './guards/admin.guard';
 import { ClientGuard } from './guards/client.guard';
-import { DeliveryGuard } from './guards/delivery.guard';
+import { UserModule } from 'src/user/user.module';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
@@ -30,21 +29,19 @@ const jwtRegistration = JwtModule.registerAsync({
     AuthService,
     AdminGuard,
     ClientGuard,
-    DeliveryGuard,
     JwtStrategy,
     JwtAuthGuard,
   ],
   imports: [
-    TypeOrmModule.forFeature([User, Session]),
+    TypeOrmModule.forFeature([Session, User, Session]),
     jwtRegistration,
-    UtilsModule,
+    UserModule,
   ],
   exports: [
     jwtRegistration,
     JwtAuthGuard,
     AdminGuard,
     ClientGuard,
-    DeliveryGuard
   ]
 })
 export class AuthModule { }

@@ -1,7 +1,5 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { JwtStrategyOutput } from "../interfaces/strategy-output.interface";
-import { Roles as RolesEnum } from "../enums/roles";
-import { Role } from "src/user/entities/roles.entity";
 import { UserService } from "src/user/user.service";
 
 @Injectable()
@@ -18,14 +16,9 @@ export class AdminGuard implements CanActivate {
     const guardOutput = request['user'] as JwtStrategyOutput;
 
     // checking if the user is an admin
-    const { user } = await this.userService.findOne(guardOutput);
+    const { user } = await this.userService.findOne(guardOutput.session.userId, guardOutput);
 
-    // The user will always exist so we don't have to make that condition here
-    const role: Role | undefined = user.roles?.find(
-      role => role.name === RolesEnum.ADMIN
-    );
-
-    if (!role) {
+    if (user.rol !== 'admin') {
       return false;
     }
 

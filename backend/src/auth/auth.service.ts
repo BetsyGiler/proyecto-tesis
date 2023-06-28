@@ -3,13 +3,13 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/user/entities/user.entity";
 import { SessionService } from "./session.service";
 import { Repository } from "typeorm";
-import { SignUpDto } from "./dto/register.dto";
 import * as bcrypt from "bcrypt";
 import environment from "src/config/env.config";
 import { IRegisterResponse } from "./interfaces/register-response.interface";
 import { SignInDto } from "./dto/login.dto";
 import { ILoginResponse } from "./interfaces/login-response.interface";
 import { JwtStrategyOutput } from "./interfaces/strategy-output.interface";
+import { CreateUserDto } from "src/user/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -19,9 +19,9 @@ export class AuthService {
     private readonly sessionService: SessionService
   ) { }
 
-  async register(user: SignUpDto): Promise<IRegisterResponse> {
+  async register(user: CreateUserDto): Promise<IRegisterResponse> {
     // hashing the password
-    const { password, deviceFingerprint } = user;
+    const { password } = user;
     const hashedPassword = bcrypt.hashSync(password, environment.hashSalts)
 
     const newUser = this.userRepository.create({
@@ -36,12 +36,14 @@ export class AuthService {
         newUser,
       );
     } catch (e) {
+      console.error(e);
       if (e.code === '23505' && e.detail.includes('email')) {
         throw new BadRequestException({
           error: 'El correo ya existe',
           detail: e.detail,
         });
       }
+      throw e;
     }
 
     // generating the refresh token linked to a determined deviceId &
@@ -49,9 +51,10 @@ export class AuthService {
     const sessionId = await this.sessionService.createRefreshToken(
       null,
       createdUser,
-      deviceFingerprint,
+      createdUser.id,
     );
 
+    console.log("Session user", newUser);
     // generatig access token based on the new refresh token
     const accessToken = await this.sessionService.createAccessToken(
       sessionId,
@@ -68,7 +71,7 @@ export class AuthService {
   }
 
   async login(user: SignInDto): Promise<ILoginResponse> {
-    const { email, password, deviceFingerprint } = user;
+    const { email, password } = user;
 
     // verifying existence of the user
     const userFound = await this.userRepository.findOne({
@@ -92,7 +95,6 @@ export class AuthService {
     // revoking all the active sessions for the current [deviceFingerprint] so a 
     // device could have only one active session
     await this.sessionService.revokeSessionsByFingerprint(
-      deviceFingerprint,
       userFound.id,
     );
 
@@ -101,7 +103,7 @@ export class AuthService {
     const sessionId = await this.sessionService.createRefreshToken(
       null,
       userFound,
-      deviceFingerprint,
+      userFound.id,
     );
 
     // generating access token
@@ -142,10 +144,10 @@ export class AuthService {
 
   async logout(guardOutput: JwtStrategyOutput) {
 
-    const { userId, deviceId } = guardOutput.session;
+    const { userId } = guardOutput.session;
 
     // revoking all the active sessions of the [userId] for the target [deviceId]
-    await this.sessionService.revokeSessionsByFingerprint(deviceId, userId);
+    await this.sessionService.revokeSessionsByFingerprint(userId);
 
     return {
       accessToken: null,
