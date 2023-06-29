@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Session } from 'src/auth/entities/session.entity';
 import { JwtStrategyOutput } from 'src/auth/interfaces/strategy-output.interface';
 import { Repository } from 'typeorm';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -13,24 +14,29 @@ export class UserService {
     private readonly userRepository: Repository<User>
   ) { }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAllClients() {
+    return (await this.userRepository.find({
+      where: {
+        rol: 'cliente'
+      },
+    })).map((user) => {
+      delete user.password;
+      return user;
+    });
   }
 
-  async findOne(id: string, guardOutput: JwtStrategyOutput) {
-
-    const { accessToken } = guardOutput;
-
+  async findOne(id: string) {
     const user = await this.userRepository.findOne({ where: { id } });
+    delete user.password;
 
-    return {
-      user,
-      accessToken
-    }
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(session: Session, updateUserDto: UpdateUserDto) {
+
+    const { userId } = session;
+
+    return await this.userRepository.update(userId, updateUserDto);
   }
 
   remove(id: number) {

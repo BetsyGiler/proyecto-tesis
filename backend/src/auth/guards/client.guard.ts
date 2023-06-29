@@ -16,7 +16,7 @@ export class ClientGuard implements CanActivate {
     const guardOutput = request['user'] as JwtStrategyOutput;
 
     // checking if the user is an admin
-    const { user } = await this.userService.findOne(guardOutput.session.userId, guardOutput);
+    const user = await this.userService.findOne(guardOutput.session.userId);
 
     if (user.rol !== 'cliente') {
       return false;

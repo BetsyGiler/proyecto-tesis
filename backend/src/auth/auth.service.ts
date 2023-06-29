@@ -27,6 +27,7 @@ export class AuthService {
     const newUser = this.userRepository.create({
       ...user,
       password: hashedPassword,
+      rol: 'cliente',
     });
 
     let createdUser: User;
@@ -54,7 +55,6 @@ export class AuthService {
       createdUser.id,
     );
 
-    console.log("Session user", newUser);
     // generatig access token based on the new refresh token
     const accessToken = await this.sessionService.createAccessToken(
       sessionId,
@@ -135,6 +135,8 @@ export class AuthService {
     if (!user) {
       throw new NotFoundException("Credenciales incorrectas");
     }
+
+    delete user.password;
 
     return {
       user,

@@ -4,9 +4,6 @@ export class CreateUserDto {
   @IsString({ message: "El nombre es obligatorio y debe ser un string" })
   nombre: string;
 
-  @IsString({ message: "El rol es obligatorio y debe ser un string" })
-  rol: string;
-
   @IsString({ message: "La imagen de perfil debe ser un string" })
   @IsOptional()
   imagenPerfil?: string;

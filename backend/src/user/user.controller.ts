@@ -1,7 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { JwtStrategyOutput } from 'src/auth/interfaces/strategy-output.interface';
 
 @Controller('user')
@@ -9,24 +10,28 @@ export class UserController {
   constructor(private readonly userService: UserService) { }
 
   @Get()
-  findAll() {
-    return this.userService.findAll();
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async findAll() {
+    return await this.userService.findAllClients();
   }
 
   @Get(':id')
-  async findOne(@Req() request: Request, @Param('id') id: string) {
-
-    const guardOutput = request['user'] as JwtStrategyOutput;
-
-    return await this.userService.findOne(id, guardOutput);
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string) {
+    return await this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  @Patch('')
+  @UseGuards(JwtAuthGuard)
+  async update(@Req() request: Request, @Body() updateUserDto: UpdateUserDto) {
+
+    const { session } = request['user'] as JwtStrategyOutput;
+
+    return await this.userService.update(session, updateUserDto);
   }
 
   @Delete(':id')
+  @UseGuards(JwtAuthGuard)
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
