@@ -4,12 +4,14 @@ import { SignInDto } from './dto/login.dto';
 import { JwtAuthGuard } from './jwt.guard';
 import { JwtStrategyOutput } from './interfaces/strategy-output.interface';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
+import { FormDataRequest, MemoryStoredFile } from 'nestjs-form-data';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
   @Post('/registrar')
+  @FormDataRequest({ storage: MemoryStoredFile })
   async register(@Body() createAuthDto: CreateUserDto) {
     return await this.authService.register(createAuthDto);
   }

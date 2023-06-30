@@ -10,22 +10,67 @@ import { SignInDto } from "./dto/login.dto";
 import { ILoginResponse } from "./interfaces/login-response.interface";
 import { JwtStrategyOutput } from "./interfaces/strategy-output.interface";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
+import * as fs from "fs";
+import { v4 } from "uuid";
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly sessionService: SessionService
+    private readonly sessionService: SessionService,
   ) { }
 
   async register(user: CreateUserDto): Promise<IRegisterResponse> {
+
+    const { imagenPerfil, password } = user;
+
+    // defining where to persist files
+    const imagePath = '/app/backend/fileStorage/';
+
+    // extracting the host & port being used
+    const host = environment.apiHost;
+    const port = environment.apiPort;
+
+    // creating the dir if it doesn't exist
+    if (!fs.existsSync(imagePath)) {
+      fs.mkdirSync(imagePath, { recursive: true });
+    }
+
+    // extracting the image extension
+    const splittedFileName = imagenPerfil?.originalName.split('.');
+    let imageName: string | undefined;
+
+    try {
+      const extension = splittedFileName[splittedFileName.length - 1];
+      // generating a new image name
+      imageName = `${v4()}.${extension}`;
+    } catch (e) {
+      console.error(e);
+    }
+
+    // writting the image file to persitent storage if it exists
+    if (imageName) {
+      // saving the image to make it persistent
+      fs.writeFileSync(
+        `${imagePath}${imageName}`,
+        imagenPerfil.buffer,
+      );
+    }
+
     // hashing the password
-    const { password } = user;
     const hashedPassword = bcrypt.hashSync(password, environment.hashSalts)
+
+    // deleting the user's DTO image
+    delete user.imagenPerfil;
+
+    const imageProtocol = host === 'localhost' ? 'http' : 'https';
+    const imageHost = `www.${host}:${port}`;
+    const imageEndpoint = `${imageProtocol}://${imageHost}/api/images/${imageName}`;
 
     const newUser = this.userRepository.create({
       ...user,
+      imagenPerfil: imageEndpoint,
       password: hashedPassword,
       rol: 'cliente',
     });

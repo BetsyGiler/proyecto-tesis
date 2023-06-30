@@ -1,12 +1,9 @@
 import { IsEmail, IsOptional, IsString, IsStrongPassword } from "class-validator";
+import { HasMimeType, IsFile, IsFiles, MaxFileSize, MemoryStoredFile } from "nestjs-form-data";
 
 export class CreateUserDto {
   @IsString({ message: "El nombre es obligatorio y debe ser un string" })
   nombre: string;
-
-  @IsString({ message: "La imagen de perfil debe ser un string" })
-  @IsOptional()
-  imagenPerfil?: string;
 
   @IsEmail({}, { message: "El email es obligatorio y debe ser un string" })
   email: string;
@@ -35,4 +32,10 @@ export class CreateUserDto {
     minSymbols: 1,
   }, { message: "La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un símbolo" })
   password: string;
+
+  @IsFile()
+  @MaxFileSize(1e6, { message: "El archivo debe ser menor a 1 MB" })
+  @HasMimeType(['image/jpeg', 'image/png'])
+  @IsOptional()
+  imagenPerfil: MemoryStoredFile;
 }

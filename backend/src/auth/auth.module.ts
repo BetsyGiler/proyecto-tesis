@@ -12,6 +12,7 @@ import { Session } from './entities/session.entity';
 import { AdminGuard } from './guards/admin.guard';
 import { ClientGuard } from './guards/client.guard';
 import { UserModule } from 'src/user/user.module';
+import { NestjsFormDataModule } from 'nestjs-form-data';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
@@ -36,6 +37,7 @@ const jwtRegistration = JwtModule.registerAsync({
     TypeOrmModule.forFeature([Session, User, Session]),
     jwtRegistration,
     UserModule,
+    NestjsFormDataModule,
   ],
   exports: [
     jwtRegistration,

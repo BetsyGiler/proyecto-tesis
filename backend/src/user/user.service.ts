@@ -36,7 +36,13 @@ export class UserService {
 
     const { userId } = session;
 
-    return await this.userRepository.update(userId, updateUserDto);
+    return await this.userRepository.update(
+      userId,
+      {
+        ...updateUserDto,
+        imagenPerfil: null,
+      }
+    );
   }
 
   remove(id: number) {

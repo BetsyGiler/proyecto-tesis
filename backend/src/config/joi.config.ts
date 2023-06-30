@@ -16,4 +16,5 @@ export const joiValidationSchema = Joi.object({
   JWT_REFRESH_EXPIRATION_TIME: Joi.number().required(),
 
   API_PORT: Joi.number().required(),
+  API_HOST: Joi.string(),
 });
