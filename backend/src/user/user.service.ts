@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateUserDto } from 'src/auth/dto/update-user.dto';
 import { Session } from 'src/auth/entities/session.entity';
-import { JwtStrategyOutput } from 'src/auth/interfaces/strategy-output.interface';
 import { Repository } from 'typeorm';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 
 @Injectable()

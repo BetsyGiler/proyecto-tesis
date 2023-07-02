@@ -6,13 +6,12 @@ import { User } from 'src/user/entities/user.entity';
 import { SessionService } from './session.service';
 import { AuthService } from './auth.service';
 import { JwtStrategy } from './jwt.strategy';
-import { JwtAuthGuard } from './jwt.guard';
-import { UserService } from 'src/user/user.service';
 import { Session } from './entities/session.entity';
 import { AdminGuard } from './guards/admin.guard';
 import { ClientGuard } from './guards/client.guard';
-import { UserModule } from 'src/user/user.module';
 import { NestjsFormDataModule } from 'nestjs-form-data';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { UserService } from 'src/user/user.service';
 
 const jwtRegistration = JwtModule.registerAsync({
   imports: [],
@@ -25,18 +24,17 @@ const jwtRegistration = JwtModule.registerAsync({
 @Module({
   controllers: [AuthController],
   providers: [
-    UserService,
     SessionService,
     AuthService,
     AdminGuard,
     ClientGuard,
     JwtStrategy,
     JwtAuthGuard,
+    UserService,
   ],
   imports: [
     TypeOrmModule.forFeature([Session, User, Session]),
     jwtRegistration,
-    UserModule,
     NestjsFormDataModule,
   ],
   exports: [

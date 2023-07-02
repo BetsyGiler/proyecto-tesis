@@ -19,6 +19,7 @@ const environment = {
   jwtExpirationTime: Number(process.env.JWT_EXPIRATION_TIME),
   jwtRefreshExpirationTime: Number(process.env.JWT_REFRESH_EXPIRATION_TIME),
 
+  fileStorageDir: process.env.FILE_STORAGE_DIR ?? '/app/backend/fileStorage/',
   apiHost: process.env.API_HOST ?? 'localhost',
   apiPort: process.env.API_PORT
 };

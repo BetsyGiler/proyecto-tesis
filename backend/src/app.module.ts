@@ -8,6 +8,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
+import { ProvidersModule } from './providers/providers.module';
 
 @Module({
   imports: [
@@ -27,7 +28,8 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
     }),
     UserModule,
     AuthModule,
-    NestjsFormDataModule.config({ storage: MemoryStoredFile })
+    NestjsFormDataModule.config({ storage: MemoryStoredFile }),
+    ProvidersModule
   ],
   controllers: [AppController],
   providers: [AppService],

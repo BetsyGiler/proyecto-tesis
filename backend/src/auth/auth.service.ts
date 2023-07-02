@@ -9,9 +9,9 @@ import { IRegisterResponse } from "./interfaces/register-response.interface";
 import { SignInDto } from "./dto/login.dto";
 import { ILoginResponse } from "./interfaces/login-response.interface";
 import { JwtStrategyOutput } from "./interfaces/strategy-output.interface";
-import { CreateUserDto } from "src/user/dto/create-user.dto";
 import * as fs from "fs";
 import { v4 } from "uuid";
+import { CreateUserDto } from "./dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
