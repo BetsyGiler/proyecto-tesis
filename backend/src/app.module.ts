@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { ProvidersModule } from './providers/providers.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -31,7 +32,8 @@ import { NotificationsModule } from './notifications/notifications.module';
     AuthModule,
     NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     ProvidersModule,
-    NotificationsModule
+    NotificationsModule,
+    ProductsModule
   ],
   controllers: [AppController],
   providers: [AppService],
