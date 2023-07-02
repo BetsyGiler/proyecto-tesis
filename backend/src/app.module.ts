@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { ProvidersModule } from './providers/providers.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -29,7 +30,8 @@ import { ProvidersModule } from './providers/providers.module';
     UserModule,
     AuthModule,
     NestjsFormDataModule.config({ storage: MemoryStoredFile }),
-    ProvidersModule
+    ProvidersModule,
+    NotificationsModule
   ],
   controllers: [AppController],
   providers: [AppService],

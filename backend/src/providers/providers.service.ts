@@ -22,19 +22,28 @@ export class ProvidersService {
     };
   }
 
-  findAll() {
-    return `This action returns all providers`;
+  async findAll() {
+    return await this.providersService.find({
+      where: {
+        isActive: true
+      }
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} provider`;
+  async findOne(id: string) {
+    return await this.providersService.findOne({
+      where: {
+        id: id,
+        isActive: true
+      }
+    });
   }
 
-  update(id: number, updateProviderDto: UpdateProviderDto) {
-    return `This action updates a #${id} provider`;
+  async update(id: string, updateProviderDto: UpdateProviderDto) {
+    return await this.providersService.save({ id, ...updateProviderDto });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} provider`;
+  async remove(id: string) {
+    return await this.providersService.update(id, { isActive: false });
   }
 }

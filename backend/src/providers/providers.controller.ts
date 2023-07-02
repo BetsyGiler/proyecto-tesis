@@ -18,22 +18,23 @@ export class ProvidersController {
   }
 
   @Get()
-  findAll() {
-    return this.providersService.findAll();
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async findAll() {
+    return await this.providersService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.providersService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.providersService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProviderDto: UpdateProviderDto) {
-    return this.providersService.update(+id, updateProviderDto);
+  async update(@Param('id') id: string, @Body() updateProviderDto: UpdateProviderDto) {
+    return await this.providersService.update(id, updateProviderDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.providersService.remove(+id);
+  async remove(@Param('id') id: string) {
+    return await this.providersService.remove(id);
   }
 }

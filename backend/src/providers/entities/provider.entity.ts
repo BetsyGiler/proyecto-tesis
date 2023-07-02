@@ -10,4 +10,7 @@ export class Provider {
 
   @Column()
   descripcion: string;
+
+  @Column()
+  isActive: boolean;
 }
