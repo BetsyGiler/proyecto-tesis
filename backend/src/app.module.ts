@@ -11,6 +11,7 @@ import { MemoryStoredFile, NestjsFormDataModule } from 'nestjs-form-data';
 import { ProvidersModule } from './providers/providers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ProductsModule } from './products/products.module';
+import { ImagesModule } from './images/images.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ProductsModule } from './products/products.module';
     NestjsFormDataModule.config({ storage: MemoryStoredFile }),
     ProvidersModule,
     NotificationsModule,
-    ProductsModule
+    ProductsModule,
+    ImagesModule
   ],
   controllers: [AppController],
   providers: [AppService],

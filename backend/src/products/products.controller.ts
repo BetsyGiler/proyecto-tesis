@@ -4,12 +4,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @Controller('productos')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) { }
 
   @Post()
+  @FormDataRequest()
   @UseGuards(JwtAuthGuard, AdminGuard)
   async create(@Body() createProductDto: CreateProductDto) {
     return await this.productsService.create(createProductDto);
