@@ -30,6 +30,7 @@ export class ProductsController {
   }
 
   @Patch(':id')
+  @FormDataRequest()
   @UseGuards(JwtAuthGuard, AdminGuard)
   async update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
     return await this.productsService.update(id, updateProductDto);

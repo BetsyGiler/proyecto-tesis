@@ -12,6 +12,7 @@ import { ProvidersModule } from './providers/providers.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ProductsModule } from './products/products.module';
 import { ImagesModule } from './images/images.module';
+import { ServicesModule } from './services/services.module';
 
 @Module({
   imports: [
@@ -35,7 +36,8 @@ import { ImagesModule } from './images/images.module';
     ProvidersModule,
     NotificationsModule,
     ProductsModule,
-    ImagesModule
+    ImagesModule,
+    ServicesModule
   ],
   controllers: [AppController],
   providers: [AppService],
