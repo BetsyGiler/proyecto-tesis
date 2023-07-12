@@ -21,8 +21,9 @@ services:
       - DB_PASSWORD=postgres
       - DB_NAME=olyndha
       - HASH_SALTS=10
-      - JWT_EXPIRATION_TIME=300
-      - JWT_REFRESH_EXPIRATION_TIME=2592000
+      # expires every year
+      - JWT_EXPIRATION_TIME=365d
+      - JWT_REFRESH_EXPIRATION_TIME=365d
       - API_PORT=8500
   db:
     image: postgres:alpine3.18
