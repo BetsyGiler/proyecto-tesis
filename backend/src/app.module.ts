@@ -13,6 +13,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ProductsModule } from './products/products.module';
 import { ImagesModule } from './images/images.module';
 import { ServicesModule } from './services/services.module';
+import { PedidosModule } from './pedidos/pedidos.module';
 
 @Module({
   imports: [
@@ -37,7 +38,8 @@ import { ServicesModule } from './services/services.module';
     NotificationsModule,
     ProductsModule,
     ImagesModule,
-    ServicesModule
+    ServicesModule,
+    PedidosModule,
   ],
   controllers: [AppController],
   providers: [AppService],

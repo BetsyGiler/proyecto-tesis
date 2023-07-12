@@ -23,7 +23,4 @@ export class Product {
 
   @Column()
   isActive: boolean;
-
-  @ManyToOne(() => Provider, { eager: true })
-  proveedor: Provider;
 }

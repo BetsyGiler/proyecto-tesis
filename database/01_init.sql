@@ -37,7 +37,7 @@ CREATE TABLE "Productos" (
   "pvp" decimal(6, 2) NOT NULL,
   "imagenPrincipalUrl" text,
   "descripcion" text,
-  "proveedorId" uuid NOT NULL
+  "proveedorId" uuid NULL
 );
 
 CREATE TABLE "Imagenes" (
