@@ -30,6 +30,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   async validate(req: Request, payload: AccessTokenPayload): Promise<JwtStrategyOutput> {
     const bearerToken = req.headers['authorization'].split(' ')[1];
 
+    if (!bearerToken) {
+      throw new UnauthorizedException("Invalid access token");
+    }
+
     // getting the new access token 
     let accessToken: string | null;
 
