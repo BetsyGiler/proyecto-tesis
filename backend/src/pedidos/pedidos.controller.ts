@@ -5,6 +5,7 @@ import { UpdatePedidoDto } from './dto/update-pedido.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { JwtStrategyOutput } from 'src/auth/interfaces/strategy-output.interface';
+import { ClientGuard } from 'src/auth/guards/client.guard';
 
 @Controller('pedidos')
 @UseGuards(JwtAuthGuard)
@@ -12,7 +13,7 @@ export class PedidosController {
   constructor(private readonly pedidosService: PedidosService) { }
 
   @Post()
-  @UseGuards(AdminGuard)
+  @UseGuards(ClientGuard)
   async create(@Req() req: Request, @Body() createPedidoDto: CreatePedidoDto) {
 
     const { session } = req['user'] as JwtStrategyOutput;

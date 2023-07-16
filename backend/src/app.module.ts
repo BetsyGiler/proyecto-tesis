@@ -15,6 +15,7 @@ import { ImagesModule } from './images/images.module';
 import { ServicesModule } from './services/services.module';
 import { PedidosModule } from './pedidos/pedidos.module';
 import { OfertasModule } from './ofertas/ofertas.module';
+import { CitasModule } from './citas/citas.module';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { OfertasModule } from './ofertas/ofertas.module';
     ServicesModule,
     PedidosModule,
     OfertasModule,
+    CitasModule,
   ],
   controllers: [AppController],
   providers: [AppService],
