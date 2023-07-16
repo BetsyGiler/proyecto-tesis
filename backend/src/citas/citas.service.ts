@@ -16,7 +16,7 @@ export class CitasService {
   async create(usuarioId: string, createCitaDto: CreateCitaDto) {
     const cita = this.citasRepository.create({
       ...createCitaDto,
-      // usuarioId,
+      usuarioId,
     });
 
     return await this.citasRepository.save(cita);
@@ -30,15 +30,18 @@ export class CitasService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cita`;
+  async findOne(id: string) {
+    return await this.citasRepository.findOne({
+      where: {
+        id,
+        isActive: true
+      }
+    });
   }
 
-  update(id: number, updateCitaDto: UpdateCitaDto) {
-    return `This action updates a #${id} cita`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} cita`;
+  async remove(id: string) {
+    return await this.citasRepository.update(id, {
+      isActive: false
+    });
   }
 }

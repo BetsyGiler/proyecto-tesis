@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req } from '@nestjs/common';
+import { AdminGuard } from 'src/auth/guards/admin.guard';
 import { ClientGuard } from 'src/auth/guards/client.guard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { JwtStrategyOutput } from 'src/auth/interfaces/strategy-output.interface';
 import { CitasService } from './citas.service';
 import { CreateCitaDto } from './dto/create-cita.dto';
-import { UpdateCitaDto } from './dto/update-cita.dto';
 
 @Controller('citas')
 export class CitasController {
@@ -26,17 +26,14 @@ export class CitasController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.citasService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCitaDto: UpdateCitaDto) {
-    return this.citasService.update(+id, updateCitaDto);
+  @UseGuards(JwtAuthGuard)
+  async findOne(@Param('id') id: string) {
+    return await this.citasService.findOne(id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.citasService.remove(+id);
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  async remove(@Param('id') id: string) {
+    return await this.citasService.remove(id);
   }
 }
