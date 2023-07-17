@@ -16,4 +16,7 @@ export class Service {
 
   @Column()
   isActive: boolean;
+
+  @Column({ nullable: true })
+  imagenPrincipalUrl?: string;
 }
