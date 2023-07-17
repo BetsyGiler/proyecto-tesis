@@ -32,7 +32,7 @@ export class CitasController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, AdminGuard)
+  @UseGuards(JwtAuthGuard)
   async remove(@Param('id') id: string) {
     return await this.citasService.remove(id);
   }
