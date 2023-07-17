@@ -66,6 +66,7 @@ CREATE TABLE "Servicios" (
   "nombre" varchar(300) NOT NULL,
   "descripcion" text,
   "costo" decimal(10, 2) NOT NULL,
+  "imagenPrincipalUrl" text,
   "isActive" boolean DEFAULT true
 );
 
