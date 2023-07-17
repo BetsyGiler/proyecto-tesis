@@ -4,12 +4,14 @@ import { CreateServiceDto } from './dto/create-service.dto';
 import { UpdateServiceDto } from './dto/update-service.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { AdminGuard } from 'src/auth/guards/admin.guard';
+import { FormDataRequest } from 'nestjs-form-data';
 
 @Controller('servicios')
 export class ServicesController {
   constructor(private readonly servicesService: ServicesService) { }
 
   @Post()
+  @FormDataRequest()
   @UseGuards(JwtAuthGuard, AdminGuard)
   async create(@Body() createServiceDto: CreateServiceDto) {
     return await this.servicesService.create(createServiceDto);
